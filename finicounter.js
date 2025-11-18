@@ -37,6 +37,8 @@
         var host = getHostname();
         var url = API_BASE_URL + '/counter?host=' + encodeURIComponent(host);
         
+        console.log('请求访问量，域名:', host, 'URL:', url); // 调试日志
+        
         try {
             var res = await fetch(url, {
                 method: 'GET',
@@ -47,11 +49,15 @@
                 credentials: 'omit'
             });
             
+            console.log('响应状态:', res.status, res.statusText); // 调试日志
+            
             if (!res.ok) {
                 throw new Error('HTTP error! status: ' + res.status);
             }
             
-            return await res.json();
+            var data = await res.json();
+            console.log('响应数据:', data); // 调试日志
+            return data;
         } catch (error) {
             console.error('获取访问量失败:', error);
             return { views: 0 };
@@ -64,10 +70,26 @@
     async function renderViews() {
         try {
             var res = await getViews();
+            console.log('API 响应:', res); // 调试日志
             var elem = document.getElementById(VIEWS_ELEMENT_ID);
             
             if (elem !== null && elem !== undefined) {
-                var views = res.views || 0;
+                // 处理不同的响应格式
+                var views = 0;
+                if (typeof res === 'object' && res !== null) {
+                    // 优先使用 views 字段
+                    if (typeof res.views === 'number') {
+                        views = res.views;
+                    } else if (res.data && typeof res.data.views === 'number') {
+                        views = res.data.views;
+                    } else if (typeof res.visit_count === 'number') {
+                        views = res.visit_count;
+                    }
+                } else if (typeof res === 'number') {
+                    views = res;
+                }
+                
+                console.log('解析后的访问量:', views, '原始响应:', JSON.stringify(res)); // 调试日志
                 elem.innerText = formatNumber(views);
                 
                 // 触发自定义事件，方便其他脚本监听
