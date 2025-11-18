@@ -6,7 +6,7 @@
 (function() {
     'use strict';
 
-    // 配置：API 地址
+    // 配置：API 地址（使用 HTTPS）
     var API_BASE_URL = window.DEVOPS_COUNTER_API || 'https://devops.icodelib.cn/api/v1/website';
     
     // 配置：显示元素的 ID（可以自定义）
